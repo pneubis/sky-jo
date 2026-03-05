@@ -4,8 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>6 Nations 2026</title>
-
-<!-- PWA -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0a0a0f">
 <meta name="mobile-web-app-capable" content="yes">
@@ -13,238 +11,214 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="6 Nations">
 <link rel="apple-touch-icon" href="icon-192.png">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
-
+<link rel="icon" type="image/png" href="icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0a0a0f;
-    --surface: #12121a;
-    --card: #1a1a28;
-    --border: #2a2a40;
-    --accent: #e8c84a;
-    --accent2: #4a7fe8;
-    --red: #e84a4a;
-    --green: #4ae87a;
-    --text: #f0f0f8;
-    --muted: #7070a0;
-    --radius: 14px;
+    --bg:#0a0a0f; --surface:#12121a; --card:#1a1a28; --border:#2a2a40;
+    --accent:#e8c84a; --accent2:#4a7fe8; --red:#e84a4a; --green:#4ae87a;
+    --text:#f0f0f8; --muted:#7070a0; --radius:14px;
+    --sat: env(safe-area-inset-top);
+    --sab: env(safe-area-inset-bottom);
+    --sal: env(safe-area-inset-left);
+    --sar: env(safe-area-inset-right);
   }
-  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body { height: 100%; overflow: hidden; }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+  /* Couvre TOUTE la zone y compris encoche */
+  html {
+    background: #0a0a0f;
+    height: 100%;
+  }
   body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    max-width: 100%;
-    margin: 0 auto;
-    position: relative;
+    font-family:'DM Sans',sans-serif;
+    background:var(--bg); color:var(--text);
+    display:flex; flex-direction:column;
+    width:100%; height:100%;
+    /* Padding pour les zones safe-area sauf en haut (géré par le header) */
+    padding-left: var(--sal);
+    padding-right: var(--sar);
+    overflow: hidden;
   }
 
-  /* HEADER */
+  /* HEADER — s'étend sous l'encoche */
   .header {
-    background: linear-gradient(135deg, #1a1030 0%, #0a0a1f 100%);
-    padding: 16px 20px 12px;
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
+    background: linear-gradient(135deg,#1a1030 0%,#0a0a1f 100%);
+    /* Padding top = hauteur de la barre de statut + padding normal */
+    padding-top: calc(env(safe-area-inset-top) + 14px);
+    padding-bottom: 12px;
+    padding-left: 20px;
+    padding-right: 20px;
+    border-bottom:1px solid var(--border);
+    flex-shrink:0;
   }
-  .header-top { display: flex; align-items: center; justify-content: space-between; }
-  .logo-area { display: flex; align-items: center; gap: 10px; }
+  .header-top { display:flex; align-items:center; justify-content:space-between; }
+  .logo-area { display:flex; align-items:center; gap:10px; }
   .logo-badge {
-    width: 40px; height: 40px;
-    background: linear-gradient(135deg, var(--accent), #d4a835);
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px;
+    width:40px; height:40px;
+    background:linear-gradient(135deg,var(--accent),#d4a835);
+    border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:20px;
   }
-  .logo-text h1 { font-family: 'Black Han Sans', sans-serif; font-size: 18px; letter-spacing: 1px; color: var(--accent); }
-  .logo-text p { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .logo-text h1 { font-family:'Black Han Sans',sans-serif; font-size:18px; letter-spacing:1px; color:var(--accent); }
+  .logo-text p { font-size:11px; color:var(--muted); margin-top:1px; }
   .live-badge {
-    background: var(--red); color: white; font-size: 10px; font-weight: 700;
-    padding: 3px 8px; border-radius: 20px; letter-spacing: 1px;
-    animation: pulse 1.5s infinite;
+    background:var(--red); color:white; font-size:10px; font-weight:700;
+    padding:3px 8px; border-radius:20px; letter-spacing:1px; animation:pulse 1.5s infinite;
   }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
 
-  /* SCROLL CONTENT */
-  .content { flex: 1; overflow-y: auto; overflow-x: hidden; padding-bottom: 80px; }
-  .content::-webkit-scrollbar { display: none; }
+  .content { flex:1; overflow-y:auto; overflow-x:hidden; padding-bottom:calc(80px + var(--sab)); }
+  .content::-webkit-scrollbar { display:none; }
 
-  /* SECTION */
-  .section { padding: 16px 16px 0; }
+  .section { padding:16px 16px 0; }
   .section-title {
-    font-family: 'Black Han Sans', sans-serif;
-    font-size: 13px; letter-spacing: 2px; color: var(--muted);
-    text-transform: uppercase; margin-bottom: 12px;
-    display: flex; align-items: center; gap: 8px;
+    font-family:'Black Han Sans',sans-serif; font-size:13px; letter-spacing:2px;
+    color:var(--muted); text-transform:uppercase; margin-bottom:12px;
+    display:flex; align-items:center; gap:8px;
   }
-  .section-title::after { content:''; flex:1; height:1px; background: var(--border); }
+  .section-title::after { content:''; flex:1; height:1px; background:var(--border); }
 
-  /* STANDINGS TABLE */
-  .standings-card {
-    background: var(--card); border-radius: var(--radius);
-    overflow: hidden; border: 1px solid var(--border);
-  }
+  .standings-card { background:var(--card); border-radius:var(--radius); overflow:hidden; border:1px solid var(--border); }
   .standings-header {
-    display: grid; grid-template-columns: 32px 1fr 28px 28px 28px 28px 40px;
-    padding: 8px 14px; background: var(--surface);
-    font-size: 10px; color: var(--muted); font-weight: 600; letter-spacing: 1px;
-    text-transform: uppercase;
+    display:grid; grid-template-columns:32px 1fr 28px 28px 28px 28px 40px;
+    padding:8px 14px; background:var(--surface);
+    font-size:10px; color:var(--muted); font-weight:600; letter-spacing:1px; text-transform:uppercase;
   }
   .standings-row {
-    display: grid; grid-template-columns: 32px 1fr 28px 28px 28px 28px 40px;
-    padding: 10px 14px; border-top: 1px solid var(--border);
-    align-items: center; transition: background .2s;
+    display:grid; grid-template-columns:32px 1fr 28px 28px 28px 28px 40px;
+    padding:10px 14px; border-top:1px solid var(--border); align-items:center; transition:background .2s;
   }
-  .standings-row:hover { background: rgba(232,200,74,.04); }
-  .pos { font-family:'Black Han Sans',sans-serif; font-size:16px; color: var(--muted); }
-  .pos.gold { color: #e8c84a; }
-  .pos.silver { color: #b0b0c0; }
-  .pos.bronze { color: #c87840; }
-  .team-info { display: flex; align-items: center; gap: 8px; }
-  .flag { font-size: 20px; }
-  .team-name { font-size: 13px; font-weight: 600; }
-  .stat { text-align: center; font-size: 13px; font-weight: 500; }
-  .pts { text-align: center; font-family:'Black Han Sans',sans-serif; font-size:15px; color: var(--accent); }
+  .standings-row:hover { background:rgba(232,200,74,.04); }
+  .pos { font-family:'Black Han Sans',sans-serif; font-size:16px; color:var(--muted); }
+  .pos.gold{color:#e8c84a} .pos.silver{color:#b0b0c0} .pos.bronze{color:#c87840}
+  .team-info { display:flex; align-items:center; gap:8px; }
+  .flag { font-size:20px; }
+  .team-name { font-size:13px; font-weight:600; }
+  .stat { text-align:center; font-size:13px; font-weight:500; }
+  .pts { text-align:center; font-family:'Black Han Sans',sans-serif; font-size:15px; color:var(--accent); }
 
-  /* MATCH CARDS */
-  .matches-list { display: flex; flex-direction: column; gap: 10px; }
+  .matches-list { display:flex; flex-direction:column; gap:10px; }
   .match-card {
-    background: var(--card); border-radius: var(--radius);
-    padding: 14px; border: 1px solid var(--border);
-    position: relative; overflow: hidden;
+    background:var(--card); border-radius:var(--radius); padding:14px;
+    border:1px solid var(--border); position:relative; overflow:hidden;
   }
-  .match-card.played { border-left: 3px solid var(--muted); }
-  .match-card.upcoming { border-left: 3px solid var(--accent2); }
-  .match-card.live { border-left: 3px solid var(--red); animation: borderPulse 1.5s infinite; }
-  @keyframes borderPulse { 0%,100%{border-left-color:var(--red)} 50%{border-left-color:#ff8080} }
-  .match-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-  .round-tag {
-    font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
-    padding: 3px 8px; border-radius: 20px;
-  }
-  .tag-played { background: rgba(112,112,160,.2); color: var(--muted); }
-  .tag-upcoming { background: rgba(74,127,232,.15); color: var(--accent2); }
-  .tag-live { background: rgba(232,74,74,.2); color: var(--red); }
-  .match-date { font-size: 11px; color: var(--muted); }
-  .match-teams {
-    display: grid; grid-template-columns: 1fr auto 1fr;
-    align-items: center; gap: 8px;
-  }
-  .match-team { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-  .match-team.home { align-items: flex-start; }
-  .match-team.away { align-items: flex-end; }
-  .match-flag { font-size: 28px; }
-  .match-name { font-size: 12px; font-weight: 600; }
-  .score-box { display: flex; align-items: center; gap: 4px; }
-  .score {
-    font-family: 'Black Han Sans', sans-serif; font-size: 28px;
-    min-width: 36px; text-align: center;
-  }
-  .score.win { color: var(--accent); }
-  .score.lose { color: var(--muted); }
-  .score-sep { font-size: 16px; color: var(--muted); font-weight: 300; }
+  .match-card.played  { border-left:3px solid var(--muted); }
+  .match-card.upcoming{ border-left:3px solid var(--accent2); }
+  .match-meta { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  .round-tag { font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; padding:3px 8px; border-radius:20px; }
+  .tag-played  { background:rgba(112,112,160,.2); color:var(--muted); }
+  .tag-upcoming{ background:rgba(74,127,232,.15); color:var(--accent2); }
+  .match-date { font-size:11px; color:var(--muted); }
+  .match-teams { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:8px; }
+  .match-team { display:flex; flex-direction:column; align-items:center; gap:4px; }
+  .match-team.home{align-items:flex-start} .match-team.away{align-items:flex-end}
+  .match-flag { font-size:28px; }
+  .match-name { font-size:12px; font-weight:600; }
+  .score-box { display:flex; align-items:center; gap:4px; }
+  .score { font-family:'Black Han Sans',sans-serif; font-size:28px; min-width:36px; text-align:center; }
+  .score.win{color:var(--accent)} .score.lose{color:var(--muted)}
+  .score-sep { font-size:16px; color:var(--muted); font-weight:300; }
   .score-tbd { font-family:'Black Han Sans',sans-serif; font-size:20px; color:var(--border); }
-  .match-venue { font-size: 10px; color: var(--muted); text-align: center; margin-top: 8px; }
+  .match-venue { font-size:10px; color:var(--muted); text-align:center; margin-top:8px; }
 
-  /* ROUND FILTER */
-  .round-filter {
-    display: flex; gap: 8px; overflow-x: auto; padding: 0 16px 12px;
-    scrollbar-width: none;
-  }
-  .round-filter::-webkit-scrollbar { display: none; }
+  .round-filter { display:flex; gap:8px; overflow-x:auto; padding:12px 16px; scrollbar-width:none; }
+  .round-filter::-webkit-scrollbar{display:none}
   .round-btn {
-    flex-shrink: 0; padding: 6px 14px; border-radius: 20px;
-    font-size: 12px; font-weight: 600; cursor: pointer;
-    border: 1px solid var(--border); background: var(--card);
-    color: var(--muted); transition: all .2s;
+    flex-shrink:0; padding:6px 14px; border-radius:20px; font-size:12px; font-weight:600;
+    cursor:pointer; border:1px solid var(--border); background:var(--card); color:var(--muted); transition:all .2s;
   }
-  .round-btn.active {
-    background: var(--accent); color: var(--bg);
-    border-color: var(--accent);
-  }
+  .round-btn.active { background:var(--accent); color:var(--bg); border-color:var(--accent); }
 
-  /* BOTTOM NAV */
+  /* BOTTOM NAV — respecte la safe area basse */
   .bottom-nav {
-    position: fixed; bottom: 0; left: 0; transform: none;
-    width: 100%; max-width: 100%;
-    background: rgba(10,10,15,.95); backdrop-filter: blur(20px);
-    border-top: 1px solid var(--border);
-    display: flex; padding: 8px 0 calc(20px + env(safe-area-inset-bottom));
-    z-index: 100;
+    position:fixed; bottom:0; left:0; right:0;
+    background:rgba(10,10,15,.97); backdrop-filter:blur(20px);
+    border-top:1px solid var(--border);
+    display:flex;
+    padding-top: 8px;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom));
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    z-index:100;
   }
-  .nav-btn {
-    flex: 1; display: flex; flex-direction: column; align-items: center;
-    gap: 4px; cursor: pointer; padding: 6px 0;
-    transition: all .2s;
-  }
-  .nav-icon { font-size: 22px; }
-  .nav-label { font-size: 10px; font-weight: 600; color: var(--muted); letter-spacing: .5px; }
-  .nav-btn.active .nav-label { color: var(--accent); }
-  .nav-btn.active .nav-icon { filter: drop-shadow(0 0 6px var(--accent)); }
+  .nav-btn { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; padding:6px 0; transition:all .2s; }
+  .nav-icon { font-size:22px; }
+  .nav-label { font-size:10px; font-weight:600; color:var(--muted); letter-spacing:.5px; }
+  .nav-btn.active .nav-label { color:var(--accent); }
+  .nav-btn.active .nav-icon { filter:drop-shadow(0 0 6px var(--accent)); }
 
-  /* PAGE VISIBILITY */
-  .page { display: none; }
-  .page.active { display: block; }
+  .page{display:none} .page.active{display:block}
 
-  /* HERO BANNER */
   .hero {
-    margin: 16px; border-radius: var(--radius);
-    background: linear-gradient(135deg, #1e1040 0%, #102040 100%);
-    padding: 20px; border: 1px solid var(--border);
-    position: relative; overflow: hidden;
+    margin:16px; border-radius:var(--radius);
+    background:linear-gradient(135deg,#1e1040 0%,#102040 100%);
+    padding:20px; border:1px solid var(--border); position:relative; overflow:hidden;
   }
-  .hero::before {
-    content: '🏉'; position: absolute; right: -10px; top: -10px;
-    font-size: 80px; opacity: .08; transform: rotate(20deg);
-  }
-  .hero-sub { font-size: 11px; color: var(--accent); font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
-  .hero-title { font-family:'Black Han Sans',sans-serif; font-size:26px; line-height:1.1; margin-bottom: 12px; }
-  .hero-flags { font-size: 24px; letter-spacing: 4px; }
-  .hero-stats { display: flex; gap: 16px; margin-top: 14px; }
-  .hero-stat { }
-  .hero-stat-val { font-family:'Black Han Sans',sans-serif; font-size:22px; color: var(--accent); }
-  .hero-stat-label { font-size: 10px; color: var(--muted); }
+  .hero::before { content:'🏉'; position:absolute; right:-10px; top:-10px; font-size:80px; opacity:.08; transform:rotate(20deg); }
+  .hero-sub { font-size:11px; color:var(--accent); font-weight:700; letter-spacing:2px; text-transform:uppercase; margin-bottom:6px; }
+  .hero-title { font-family:'Black Han Sans',sans-serif; font-size:26px; line-height:1.1; margin-bottom:12px; }
+  .hero-flags { font-size:24px; letter-spacing:4px; }
+  .hero-stats { display:flex; gap:16px; margin-top:14px; }
+  .hero-stat-val { font-family:'Black Han Sans',sans-serif; font-size:22px; color:var(--accent); }
+  .hero-stat-label { font-size:10px; color:var(--muted); }
 
-  /* LEADER CARD */
   .leader-card {
-    margin: 0 16px 16px;
-    background: linear-gradient(135deg, rgba(232,200,74,.12), rgba(232,200,74,.04));
-    border: 1px solid rgba(232,200,74,.3);
-    border-radius: var(--radius); padding: 14px;
+    margin:0 16px 16px;
+    background:linear-gradient(135deg,rgba(232,200,74,.12),rgba(232,200,74,.04));
+    border:1px solid rgba(232,200,74,.3); border-radius:var(--radius); padding:14px;
   }
-  .leader-label { font-size: 10px; color: var(--accent); font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
-  .leader-content { display: flex; align-items: center; gap: 10px; }
-  .leader-flag { font-size: 32px; }
+  .leader-label { font-size:10px; color:var(--accent); font-weight:700; letter-spacing:2px; text-transform:uppercase; margin-bottom:6px; }
+  .leader-content { display:flex; align-items:center; gap:10px; }
+  .leader-flag { font-size:32px; }
   .leader-name { font-family:'Black Han Sans',sans-serif; font-size:20px; }
-  .leader-pts { font-size: 13px; color: var(--muted); }
+  .leader-pts { font-size:13px; color:var(--muted); }
 
-  /* NEXT MATCH */
   .next-card {
-    margin: 0 16px 16px;
-    background: rgba(74,127,232,.08);
-    border: 1px solid rgba(74,127,232,.25);
-    border-radius: var(--radius); padding: 14px;
+    margin:0 16px 16px; background:rgba(74,127,232,.08);
+    border:1px solid rgba(74,127,232,.25); border-radius:var(--radius); padding:14px;
   }
-  .countdown { font-family:'Black Han Sans',sans-serif; font-size:18px; color: var(--accent2); }
 
-  /* TABS */
-  .tab-bar {
-    display: flex; gap: 0; margin: 0 16px 12px;
-    background: var(--surface); border-radius: 10px; padding: 4px;
+  /* NOTIFICATION CARD */
+  .notif-card {
+    margin:0 16px 16px;
+    background:rgba(74,232,122,.06);
+    border:1px solid rgba(74,232,122,.25); border-radius:var(--radius); padding:14px;
   }
-  .tab-btn {
-    flex: 1; padding: 8px; text-align: center; border-radius: 7px;
-    font-size: 12px; font-weight: 600; color: var(--muted);
-    cursor: pointer; transition: all .2s;
+  .notif-card .notif-title { font-size:10px; color:var(--green); font-weight:700; letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; }
+  .notif-card .notif-desc { font-size:12px; color:var(--muted); margin-bottom:10px; line-height:1.5; }
+  .notif-btn {
+    display:inline-flex; align-items:center; gap:6px;
+    padding:9px 16px; border-radius:10px; font-size:13px; font-weight:700;
+    cursor:pointer; transition:all .2s; border:none; outline:none;
   }
-  .tab-btn.active { background: var(--card); color: var(--text); }
+  .notif-btn.enable  { background:linear-gradient(135deg,var(--green),#30c060); color:#0a0a0f; }
+  .notif-btn.test    { background:var(--surface); color:var(--muted); border:1px solid var(--border); }
+  .notif-btn.enabled { background:rgba(74,232,122,.15); color:var(--green); border:1px solid rgba(74,232,122,.3); cursor:default; }
+  .notif-actions { display:flex; gap:8px; flex-wrap:wrap; }
+  #notif-status { font-size:11px; color:var(--muted); margin-top:8px; }
 
-  .empty { text-align:center; padding: 30px; color: var(--muted); font-size: 14px; }
+  /* INSTALL BANNER */
+  #install-banner {
+    display:none; position:fixed;
+    bottom: calc(env(safe-area-inset-bottom) + 72px);
+    left:12px; right:12px; z-index:200;
+    background:linear-gradient(135deg,#1e1a10,#12100a);
+    border:1px solid rgba(232,200,74,.4); border-radius:16px;
+    padding:14px 16px; box-shadow:0 8px 32px rgba(0,0,0,.6);
+    animation:slideUp .35s cubic-bezier(.34,1.56,.64,1) forwards;
+  }
+  @keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+  .ib-top { display:flex; align-items:center; gap:12px; }
+  .ib-icon { width:48px; height:48px; border-radius:12px; flex-shrink:0; background:linear-gradient(135deg,var(--accent),#d4a835); display:flex; align-items:center; justify-content:center; font-size:24px; }
+  .ib-text { flex:1; }
+  .ib-title { font-family:'Black Han Sans',sans-serif; font-size:15px; color:var(--text); }
+  .ib-sub { font-size:11px; color:var(--muted); margin-top:2px; }
+  .ib-close { width:28px; height:28px; border-radius:50%; background:var(--surface); display:flex; align-items:center; justify-content:center; font-size:14px; cursor:pointer; color:var(--muted); flex-shrink:0; }
+  .ib-actions { display:flex; gap:8px; margin-top:12px; }
+  .ib-btn-install { flex:1; padding:10px; border-radius:10px; font-weight:700; font-size:13px; background:linear-gradient(135deg,var(--accent),#d4a835); color:var(--bg); cursor:pointer; text-align:center; }
+  .ib-btn-later { padding:10px 16px; border-radius:10px; font-size:13px; font-weight:600; background:var(--surface); color:var(--muted); cursor:pointer; }
+
+  .empty { text-align:center; padding:30px; color:var(--muted); font-size:14px; }
 </style>
 </head>
 <body>
@@ -264,7 +238,7 @@
 
 <div class="content">
 
-  <!-- HOME PAGE -->
+  <!-- HOME -->
   <div class="page active" id="page-home">
     <div class="hero">
       <div class="hero-sub">Tournoi en cours</div>
@@ -300,156 +274,78 @@
       </div>
     </div>
 
+    <!-- NOTIFICATIONS CARD -->
+    <div class="notif-card">
+      <div class="notif-title">🔔 Alertes matchs</div>
+      <div class="notif-desc">Recevez une notification <strong style="color:var(--text)">15 minutes avant</strong> chaque match, même si l'app est fermée.</div>
+      <div class="notif-actions">
+        <button class="notif-btn enable" id="notif-btn-enable" onclick="requestNotifPermission()">🔔 Activer les alertes</button>
+        <button class="notif-btn test" id="notif-btn-test" onclick="sendTestNotif()" style="display:none">🧪 Tester</button>
+      </div>
+      <div id="notif-status"></div>
+    </div>
+
     <div class="section">
       <div class="section-title">Classement rapide</div>
       <div class="standings-card">
-        <div class="standings-header">
-          <div>#</div><div>Équipe</div><div>J</div><div>V</div><div>D</div><div>N</div><div>Pts</div>
-        </div>
-        <div class="standings-row">
-          <div class="pos gold">1</div>
-          <div class="team-info"><span class="flag">🇮🇪</span><span class="team-name">Irlande</span></div>
-          <div class="stat">2</div><div class="stat">2</div><div class="stat">0</div><div class="stat">0</div>
-          <div class="pts">14</div>
-        </div>
-        <div class="standings-row">
-          <div class="pos silver">2</div>
-          <div class="team-info"><span class="flag">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span><span class="team-name">Angleterre</span></div>
-          <div class="stat">2</div><div class="stat">2</div><div class="stat">0</div><div class="stat">0</div>
-          <div class="pts">10</div>
-        </div>
-        <div class="standings-row">
-          <div class="pos bronze">3</div>
-          <div class="team-info"><span class="flag">🇫🇷</span><span class="team-name">France</span></div>
-          <div class="stat">2</div><div class="stat">1</div><div class="stat">1</div><div class="stat">0</div>
-          <div class="pts">9</div>
-        </div>
-        <div class="standings-row">
-          <div class="pos">4</div>
-          <div class="team-info"><span class="flag">🏴󠁧󠁢󠁳󠁣󠁴󠁿</span><span class="team-name">Écosse</span></div>
-          <div class="stat">2</div><div class="stat">1</div><div class="stat">1</div><div class="stat">0</div>
-          <div class="pts">5</div>
-        </div>
-        <div class="standings-row">
-          <div class="pos">5</div>
-          <div class="team-info"><span class="flag">🏴󠁧󠁢󠁷󠁬󠁳󠁿</span><span class="team-name">Pays de Galles</span></div>
-          <div class="stat">2</div><div class="stat">0</div><div class="stat">2</div><div class="stat">0</div>
-          <div class="pts">2</div>
-        </div>
-        <div class="standings-row">
-          <div class="pos">6</div>
-          <div class="team-info"><span class="flag">🇮🇹</span><span class="team-name">Italie</span></div>
-          <div class="stat">2</div><div class="stat">0</div><div class="stat">2</div><div class="stat">0</div>
-          <div class="pts">1</div>
-        </div>
+        <div class="standings-header"><div>#</div><div>Équipe</div><div>J</div><div>V</div><div>D</div><div>N</div><div>Pts</div></div>
+        <div class="standings-row"><div class="pos gold">1</div><div class="team-info"><span class="flag">🇮🇪</span><span class="team-name">Irlande</span></div><div class="stat">2</div><div class="stat">2</div><div class="stat">0</div><div class="stat">0</div><div class="pts">14</div></div>
+        <div class="standings-row"><div class="pos silver">2</div><div class="team-info"><span class="flag">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span><span class="team-name">Angleterre</span></div><div class="stat">2</div><div class="stat">2</div><div class="stat">0</div><div class="stat">0</div><div class="pts">10</div></div>
+        <div class="standings-row"><div class="pos bronze">3</div><div class="team-info"><span class="flag">🇫🇷</span><span class="team-name">France</span></div><div class="stat">2</div><div class="stat">1</div><div class="stat">1</div><div class="stat">0</div><div class="pts">9</div></div>
+        <div class="standings-row"><div class="pos">4</div><div class="team-info"><span class="flag">🏴󠁧󠁢󠁳󠁣󠁴󠁿</span><span class="team-name">Écosse</span></div><div class="stat">2</div><div class="stat">1</div><div class="stat">1</div><div class="stat">0</div><div class="pts">5</div></div>
+        <div class="standings-row"><div class="pos">5</div><div class="team-info"><span class="flag">🏴󠁧󠁢󠁷󠁬󠁳󠁿</span><span class="team-name">Pays de Galles</span></div><div class="stat">2</div><div class="stat">0</div><div class="stat">2</div><div class="stat">0</div><div class="pts">2</div></div>
+        <div class="standings-row"><div class="pos">6</div><div class="team-info"><span class="flag">🇮🇹</span><span class="team-name">Italie</span></div><div class="stat">2</div><div class="stat">0</div><div class="stat">2</div><div class="stat">0</div><div class="pts">1</div></div>
       </div>
     </div>
     <div style="height:16px"></div>
   </div>
 
-  <!-- CLASSEMENT PAGE -->
+  <!-- CLASSEMENT -->
   <div class="page" id="page-classement">
     <div class="section">
       <div class="section-title">Classement général</div>
       <div class="standings-card">
-        <div class="standings-header">
-          <div>#</div><div>Équipe</div><div>J</div><div>V</div><div>D</div><div>N</div><div>Pts</div>
-        </div>
-        <div class="standings-row">
-          <div class="pos gold">1</div>
-          <div class="team-info"><span class="flag">🇮🇪</span><span class="team-name">Irlande</span></div>
-          <div class="stat">2</div><div class="stat">2</div><div class="stat">0</div><div class="stat">0</div>
-          <div class="pts">14</div>
-        </div>
-        <div class="standings-row">
-          <div class="pos silver">2</div>
-          <div class="team-info"><span class="flag">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span><span class="team-name">Angleterre</span></div>
-          <div class="stat">2</div><div class="stat">2</div><div class="stat">0</div><div class="stat">0</div>
-          <div class="pts">10</div>
-        </div>
-        <div class="standings-row">
-          <div class="pos bronze">3</div>
-          <div class="team-info"><span class="flag">🇫🇷</span><span class="team-name">France</span></div>
-          <div class="stat">2</div><div class="stat">1</div><div class="stat">1</div><div class="stat">0</div>
-          <div class="pts">9</div>
-        </div>
-        <div class="standings-row">
-          <div class="pos">4</div>
-          <div class="team-info"><span class="flag">🏴󠁧󠁢󠁳󠁣󠁴󠁿</span><span class="team-name">Écosse</span></div>
-          <div class="stat">2</div><div class="stat">1</div><div class="stat">1</div><div class="stat">0</div>
-          <div class="pts">5</div>
-        </div>
-        <div class="standings-row">
-          <div class="pos">5</div>
-          <div class="team-info"><span class="flag">🏴󠁧󠁢󠁷󠁬󠁳󠁿</span><span class="team-name">Pays de Galles</span></div>
-          <div class="stat">2</div><div class="stat">0</div><div class="stat">2</div><div class="stat">0</div>
-          <div class="pts">2</div>
-        </div>
-        <div class="standings-row">
-          <div class="pos">6</div>
-          <div class="team-info"><span class="flag">🇮🇹</span><span class="team-name">Italie</span></div>
-          <div class="stat">2</div><div class="stat">0</div><div class="stat">2</div><div class="stat">0</div>
-          <div class="pts">1</div>
-        </div>
+        <div class="standings-header"><div>#</div><div>Équipe</div><div>J</div><div>V</div><div>D</div><div>N</div><div>Pts</div></div>
+        <div class="standings-row"><div class="pos gold">1</div><div class="team-info"><span class="flag">🇮🇪</span><span class="team-name">Irlande</span></div><div class="stat">2</div><div class="stat">2</div><div class="stat">0</div><div class="stat">0</div><div class="pts">14</div></div>
+        <div class="standings-row"><div class="pos silver">2</div><div class="team-info"><span class="flag">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span><span class="team-name">Angleterre</span></div><div class="stat">2</div><div class="stat">2</div><div class="stat">0</div><div class="stat">0</div><div class="pts">10</div></div>
+        <div class="standings-row"><div class="pos bronze">3</div><div class="team-info"><span class="flag">🇫🇷</span><span class="team-name">France</span></div><div class="stat">2</div><div class="stat">1</div><div class="stat">1</div><div class="stat">0</div><div class="pts">9</div></div>
+        <div class="standings-row"><div class="pos">4</div><div class="team-info"><span class="flag">🏴󠁧󠁢󠁳󠁣󠁴󠁿</span><span class="team-name">Écosse</span></div><div class="stat">2</div><div class="stat">1</div><div class="stat">1</div><div class="stat">0</div><div class="pts">5</div></div>
+        <div class="standings-row"><div class="pos">5</div><div class="team-info"><span class="flag">🏴󠁧󠁢󠁷󠁬󠁳󠁿</span><span class="team-name">Pays de Galles</span></div><div class="stat">2</div><div class="stat">0</div><div class="stat">2</div><div class="stat">0</div><div class="pts">2</div></div>
+        <div class="standings-row"><div class="pos">6</div><div class="team-info"><span class="flag">🇮🇹</span><span class="team-name">Italie</span></div><div class="stat">2</div><div class="stat">0</div><div class="stat">2</div><div class="stat">0</div><div class="pts">1</div></div>
       </div>
     </div>
-
     <div class="section" style="margin-top:16px">
       <div class="section-title">Différence de points</div>
       <div class="standings-card">
         <div style="padding:12px 14px">
           <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
             <span style="font-size:18px">🇮🇪</span>
-            <div style="flex:1">
-              <div style="height:8px;background:var(--surface);border-radius:4px;overflow:hidden">
-                <div style="width:100%;height:100%;background:linear-gradient(90deg,var(--accent),#d4a835);border-radius:4px"></div>
-              </div>
-            </div>
+            <div style="flex:1"><div style="height:8px;background:var(--surface);border-radius:4px;overflow:hidden"><div style="width:100%;height:100%;background:linear-gradient(90deg,var(--accent),#d4a835);border-radius:4px"></div></div></div>
             <span style="font-family:'Black Han Sans',sans-serif;color:var(--accent);min-width:40px;text-align:right">+52</span>
           </div>
           <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
             <span style="font-size:18px">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span>
-            <div style="flex:1">
-              <div style="height:8px;background:var(--surface);border-radius:4px;overflow:hidden">
-                <div style="width:75%;height:100%;background:linear-gradient(90deg,#b0b0e0,#8080c0);border-radius:4px"></div>
-              </div>
-            </div>
+            <div style="flex:1"><div style="height:8px;background:var(--surface);border-radius:4px;overflow:hidden"><div style="width:75%;height:100%;background:linear-gradient(90deg,#b0b0e0,#8080c0);border-radius:4px"></div></div></div>
             <span style="font-family:'Black Han Sans',sans-serif;color:#b0b0e0;min-width:40px;text-align:right">+39</span>
           </div>
           <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
             <span style="font-size:18px">🇫🇷</span>
-            <div style="flex:1">
-              <div style="height:8px;background:var(--surface);border-radius:4px;overflow:hidden">
-                <div style="width:55%;height:100%;background:linear-gradient(90deg,#4a7fe8,#3060c0);border-radius:4px"></div>
-              </div>
-            </div>
+            <div style="flex:1"><div style="height:8px;background:var(--surface);border-radius:4px;overflow:hidden"><div style="width:55%;height:100%;background:linear-gradient(90deg,#4a7fe8,#3060c0);border-radius:4px"></div></div></div>
             <span style="font-family:'Black Han Sans',sans-serif;color:var(--accent2);min-width:40px;text-align:right">+14</span>
           </div>
           <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
             <span style="font-size:18px">🏴󠁧󠁢󠁳󠁣󠁴󠁿</span>
-            <div style="flex:1">
-              <div style="height:8px;background:var(--surface);border-radius:4px;overflow:hidden">
-                <div style="width:30%;height:100%;background:linear-gradient(90deg,#6060a0,#404080);border-radius:4px"></div>
-              </div>
-            </div>
+            <div style="flex:1"><div style="height:8px;background:var(--surface);border-radius:4px;overflow:hidden"><div style="width:30%;height:100%;background:linear-gradient(90deg,#6060a0,#404080);border-radius:4px"></div></div></div>
             <span style="font-family:'Black Han Sans',sans-serif;color:var(--muted);min-width:40px;text-align:right">-3</span>
           </div>
           <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
             <span style="font-size:18px">🏴󠁧󠁢󠁷󠁬󠁳󠁿</span>
-            <div style="flex:1">
-              <div style="height:8px;background:var(--surface);border-radius:4px;overflow:hidden">
-                <div style="width:15%;height:100%;background:linear-gradient(90deg,var(--red),#c03030);border-radius:4px"></div>
-              </div>
-            </div>
+            <div style="flex:1"><div style="height:8px;background:var(--surface);border-radius:4px;overflow:hidden"><div style="width:15%;height:100%;background:linear-gradient(90deg,var(--red),#c03030);border-radius:4px"></div></div></div>
             <span style="font-family:'Black Han Sans',sans-serif;color:var(--red);min-width:40px;text-align:right">-48</span>
           </div>
           <div style="display:flex;align-items:center;gap:10px;padding:8px 0">
             <span style="font-size:18px">🇮🇹</span>
-            <div style="flex:1">
-              <div style="height:8px;background:var(--surface);border-radius:4px;overflow:hidden">
-                <div style="width:8%;height:100%;background:linear-gradient(90deg,#c04040,#903030);border-radius:4px"></div>
-              </div>
-            </div>
+            <div style="flex:1"><div style="height:8px;background:var(--surface);border-radius:4px;overflow:hidden"><div style="width:8%;height:100%;background:linear-gradient(90deg,#c04040,#903030);border-radius:4px"></div></div></div>
             <span style="font-family:'Black Han Sans',sans-serif;color:var(--red);min-width:40px;text-align:right">-54</span>
           </div>
         </div>
@@ -458,7 +354,7 @@
     <div style="height:16px"></div>
   </div>
 
-  <!-- MATCHS PAGE -->
+  <!-- MATCHS -->
   <div class="page" id="page-matchs">
     <div class="round-filter" id="round-filter">
       <div class="round-btn active" onclick="filterRound('all',this)">Tous</div>
@@ -468,7 +364,6 @@
       <div class="round-btn" onclick="filterRound('4',this)">J4</div>
       <div class="round-btn" onclick="filterRound('5',this)">J5</div>
     </div>
-
     <div class="section" style="padding-top:0">
       <div class="matches-list" id="matches-list"></div>
     </div>
@@ -479,79 +374,46 @@
 
 <!-- BOTTOM NAV -->
 <div class="bottom-nav">
-  <div class="nav-btn active" onclick="showPage('home',this)">
-    <div class="nav-icon">🏠</div>
-    <div class="nav-label">Accueil</div>
+  <div class="nav-btn active" onclick="showPage('home',this)"><div class="nav-icon">🏠</div><div class="nav-label">Accueil</div></div>
+  <div class="nav-btn" onclick="showPage('classement',this)"><div class="nav-icon">🏆</div><div class="nav-label">Classement</div></div>
+  <div class="nav-btn" onclick="showPage('matchs',this)"><div class="nav-icon">📅</div><div class="nav-label">Matchs</div></div>
+</div>
+
+<!-- INSTALL BANNER -->
+<div id="install-banner">
+  <div class="ib-top">
+    <div class="ib-icon">🏉</div>
+    <div class="ib-text">
+      <div class="ib-title">6 Nations 2026</div>
+      <div class="ib-sub">Installer l'app sur votre écran d'accueil</div>
+    </div>
+    <div class="ib-close" onclick="dismissBanner()">✕</div>
   </div>
-  <div class="nav-btn" onclick="showPage('classement',this)">
-    <div class="nav-icon">🏆</div>
-    <div class="nav-label">Classement</div>
-  </div>
-  <div class="nav-btn" onclick="showPage('matchs',this)">
-    <div class="nav-icon">📅</div>
-    <div class="nav-label">Matchs</div>
+  <div class="ib-actions">
+    <div class="ib-btn-install" onclick="installApp()">⬇️ Installer</div>
+    <div class="ib-btn-later" onclick="dismissBanner()">Plus tard</div>
   </div>
 </div>
 
 <script>
+// ── Données matchs ────────────────────────────────────────
 const matches = [
-  // JOURNÉE 1 (1 février 2026)
-  { round:1, status:'played', date:'1 fév 2026', time:'15h00',
-    home:{flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',name:'Angleterre'}, away:{flag:'🇮🇪',name:'Irlande'},
-    score:{h:17,a:22}, venue:'Twickenham, Londres' },
-  { round:1, status:'played', date:'1 fév 2026', time:'17h15',
-    home:{flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿',name:'Écosse'}, away:{flag:'🇮🇹',name:'Italie'},
-    score:{h:31,a:13}, venue:'Murrayfield, Édimbourg' },
-  { round:1, status:'played', date:'2 fév 2026', time:'15h30',
-    home:{flag:'🇫🇷',name:'France'}, away:{flag:'🏴󠁧󠁢󠁷󠁬󠁳󠁿',name:'Pays de Galles'},
-    score:{h:45,a:7}, venue:'Stade de France, Paris' },
-
-  // JOURNÉE 2 (8 février 2026)
-  { round:2, status:'played', date:'8 fév 2026', time:'15h00',
-    home:{flag:'🇮🇪',name:'Irlande'}, away:{flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿',name:'Écosse'},
-    score:{h:32,a:12}, venue:'Aviva Stadium, Dublin' },
-  { round:2, status:'played', date:'8 fév 2026', time:'17h15',
-    home:{flag:'🏴󠁧󠁢󠁷󠁬󠁳󠁿',name:'Pays de Galles'}, away:{flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',name:'Angleterre'},
-    score:{h:10,a:33}, venue:'Principality Stadium, Cardiff' },
-  { round:2, status:'played', date:'9 fév 2026', time:'15h30',
-    home:{flag:'🇮🇹',name:'Italie'}, away:{flag:'🇫🇷',name:'France'},
-    score:{h:17,a:24}, venue:'Olimpico, Rome' },
-
-  // JOURNÉE 3 (7 mars 2026) — EN COURS / À VENIR
-  { round:3, status:'upcoming', date:'7 mars 2026', time:'14h15',
-    home:{flag:'🇮🇪',name:'Irlande'}, away:{flag:'🏴󠁧󠁢󠁷󠁬󠁳󠁿',name:'Pays de Galles'},
-    score:{h:null,a:null}, venue:'Aviva Stadium, Dublin' },
-  { round:3, status:'upcoming', date:'7 mars 2026', time:'16h45',
-    home:{flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',name:'Angleterre'}, away:{flag:'🇫🇷',name:'France'},
-    score:{h:null,a:null}, venue:'Twickenham, Londres' },
-  { round:3, status:'upcoming', date:'8 mars 2026', time:'15h00',
-    home:{flag:'🇮🇹',name:'Italie'}, away:{flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿',name:'Écosse'},
-    score:{h:null,a:null}, venue:'Olimpico, Rome' },
-
-  // JOURNÉE 4 (14 mars 2026)
-  { round:4, status:'upcoming', date:'14 mars 2026', time:'14h15',
-    home:{flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿',name:'Écosse'}, away:{flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',name:'Angleterre'},
-    score:{h:null,a:null}, venue:'Murrayfield, Édimbourg' },
-  { round:4, status:'upcoming', date:'14 mars 2026', time:'16h45',
-    home:{flag:'🏴󠁧󠁢󠁷󠁬󠁳󠁿',name:'Pays de Galles'}, away:{flag:'🇮🇹',name:'Italie'},
-    score:{h:null,a:null}, venue:'Principality Stadium, Cardiff' },
-  { round:4, status:'upcoming', date:'15 mars 2026', time:'15h30',
-    home:{flag:'🇫🇷',name:'France'}, away:{flag:'🇮🇪',name:'Irlande'},
-    score:{h:null,a:null}, venue:'Stade de France, Paris' },
-
-  // JOURNÉE 5 (21 mars 2026) — Grand Chelem potentiel
-  { round:5, status:'upcoming', date:'21 mars 2026', time:'14h00',
-    home:{flag:'🏴󠁧󠁢󠁷󠁬󠁳󠁿',name:'Pays de Galles'}, away:{flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿',name:'Écosse'},
-    score:{h:null,a:null}, venue:'Principality Stadium, Cardiff' },
-  { round:5, status:'upcoming', date:'21 mars 2026', time:'15h45',
-    home:{flag:'🇮🇹',name:'Italie'}, away:{flag:'🇮🇪',name:'Irlande'},
-    score:{h:null,a:null}, venue:'Olimpico, Rome' },
-  { round:5, status:'upcoming', date:'21 mars 2026', time:'17h45',
-    home:{flag:'🇫🇷',name:'France'}, away:{flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',name:'Angleterre'},
-    score:{h:null,a:null}, venue:'Stade de France, Paris' },
+  { round:1, status:'played',   date:'1 fév 2026',   time:'15h00', home:{flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',name:'Angleterre'},     away:{flag:'🇮🇪',name:'Irlande'},        score:{h:17,a:22}, venue:'Twickenham, Londres' },
+  { round:1, status:'played',   date:'1 fév 2026',   time:'17h15', home:{flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿',name:'Écosse'},         away:{flag:'🇮🇹',name:'Italie'},         score:{h:31,a:13}, venue:'Murrayfield, Édimbourg' },
+  { round:1, status:'played',   date:'2 fév 2026',   time:'15h30', home:{flag:'🇫🇷',name:'France'},           away:{flag:'🏴󠁧󠁢󠁷󠁬󠁳󠁿',name:'Pays de Galles'}, score:{h:45,a:7},  venue:'Stade de France, Paris' },
+  { round:2, status:'played',   date:'8 fév 2026',   time:'15h00', home:{flag:'🇮🇪',name:'Irlande'},          away:{flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿',name:'Écosse'},        score:{h:32,a:12}, venue:'Aviva Stadium, Dublin' },
+  { round:2, status:'played',   date:'8 fév 2026',   time:'17h15', home:{flag:'🏴󠁧󠁢󠁷󠁬󠁳󠁿',name:'Pays de Galles'}, away:{flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',name:'Angleterre'},  score:{h:10,a:33}, venue:'Principality Stadium, Cardiff' },
+  { round:2, status:'played',   date:'9 fév 2026',   time:'15h30', home:{flag:'🇮🇹',name:'Italie'},           away:{flag:'🇫🇷',name:'France'},          score:{h:17,a:24}, venue:'Olimpico, Rome' },
+  { round:3, status:'upcoming', date:'7 mars 2026',  time:'14h15', home:{flag:'🇮🇪',name:'Irlande'},          away:{flag:'🏴󠁧󠁢󠁷󠁬󠁳󠁿',name:'Pays de Galles'}, score:{h:null,a:null}, venue:'Aviva Stadium, Dublin' },
+  { round:3, status:'upcoming', date:'7 mars 2026',  time:'16h45', home:{flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',name:'Angleterre'},     away:{flag:'🇫🇷',name:'France'},          score:{h:null,a:null}, venue:'Twickenham, Londres' },
+  { round:3, status:'upcoming', date:'8 mars 2026',  time:'15h00', home:{flag:'🇮🇹',name:'Italie'},           away:{flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿',name:'Écosse'},        score:{h:null,a:null}, venue:'Olimpico, Rome' },
+  { round:4, status:'upcoming', date:'14 mars 2026', time:'14h15', home:{flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿',name:'Écosse'},         away:{flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',name:'Angleterre'},  score:{h:null,a:null}, venue:'Murrayfield, Édimbourg' },
+  { round:4, status:'upcoming', date:'14 mars 2026', time:'16h45', home:{flag:'🏴󠁧󠁢󠁷󠁬󠁳󠁿',name:'Pays de Galles'}, away:{flag:'🇮🇹',name:'Italie'},         score:{h:null,a:null}, venue:'Principality Stadium, Cardiff' },
+  { round:4, status:'upcoming', date:'15 mars 2026', time:'15h30', home:{flag:'🇫🇷',name:'France'},           away:{flag:'🇮🇪',name:'Irlande'},        score:{h:null,a:null}, venue:'Stade de France, Paris' },
+  { round:5, status:'upcoming', date:'21 mars 2026', time:'14h00', home:{flag:'🏴󠁧󠁢󠁷󠁬󠁳󠁿',name:'Pays de Galles'}, away:{flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿',name:'Écosse'},        score:{h:null,a:null}, venue:'Principality Stadium, Cardiff' },
+  { round:5, status:'upcoming', date:'21 mars 2026', time:'15h45', home:{flag:'🇮🇹',name:'Italie'},           away:{flag:'🇮🇪',name:'Irlande'},        score:{h:null,a:null}, venue:'Olimpico, Rome' },
+  { round:5, status:'upcoming', date:'21 mars 2026', time:'17h45', home:{flag:'🇫🇷',name:'France'},           away:{flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',name:'Angleterre'},  score:{h:null,a:null}, venue:'Stade de France, Paris' },
 ];
-
-let currentRound = 'all';
 
 function getWinner(m) {
   if (m.status !== 'played') return null;
@@ -563,64 +425,36 @@ function getWinner(m) {
 function renderMatches(filter) {
   const list = document.getElementById('matches-list');
   const filtered = filter === 'all' ? matches : matches.filter(m => m.round == filter);
-  
-  if (filtered.length === 0) {
-    list.innerHTML = '<div class="empty">Aucun match pour cette journée</div>';
-    return;
-  }
-
-  let html = '';
-  let lastRound = null;
-
+  if (!filtered.length) { list.innerHTML = '<div class="empty">Aucun match</div>'; return; }
+  let html = '', lastRound = null;
   filtered.forEach(m => {
     if (filter === 'all' && m.round !== lastRound) {
       lastRound = m.round;
       html += `<div class="section-title" style="padding:8px 0 4px">Journée ${m.round}</div>`;
     }
-
-    const winner = getWinner(m);
-    const hClass = winner === 'home' ? 'win' : (winner === 'away' ? 'lose' : '');
-    const aClass = winner === 'away' ? 'win' : (winner === 'home' ? 'lose' : '');
-    const cardClass = m.status === 'played' ? 'played' : (m.status === 'live' ? 'live' : 'upcoming');
-    const tagClass = m.status === 'played' ? 'tag-played' : (m.status === 'live' ? 'tag-live' : 'tag-upcoming');
-    const tagText = m.status === 'played' ? 'Terminé' : (m.status === 'live' ? '🔴 Live' : 'À venir');
-
-    const scoreHtml = m.status === 'played' || m.status === 'live'
-      ? `<div class="score-box">
-          <div class="score ${hClass}">${m.score.h}</div>
-          <div class="score-sep">–</div>
-          <div class="score ${aClass}">${m.score.a}</div>
-        </div>`
-      : `<div class="score-box">
-          <div class="score-tbd">vs</div>
-        </div>`;
-
-    html += `
-    <div class="match-card ${cardClass}">
+    const w = getWinner(m);
+    const hC = w==='home'?'win':w==='away'?'lose':'';
+    const aC = w==='away'?'win':w==='home'?'lose':'';
+    const scoreHtml = m.status === 'played'
+      ? `<div class="score-box"><div class="score ${hC}">${m.score.h}</div><div class="score-sep">–</div><div class="score ${aC}">${m.score.a}</div></div>`
+      : `<div class="score-box"><div class="score-tbd">vs</div></div>`;
+    html += `<div class="match-card ${m.status}">
       <div class="match-meta">
-        <span class="round-tag ${tagClass}">${tagText}</span>
+        <span class="round-tag ${m.status==='played'?'tag-played':'tag-upcoming'}">${m.status==='played'?'Terminé':'À venir'}</span>
         <span class="match-date">${m.date} · ${m.time}</span>
       </div>
       <div class="match-teams">
-        <div class="match-team home">
-          <div class="match-flag">${m.home.flag}</div>
-          <div class="match-name">${m.home.name}</div>
-        </div>
+        <div class="match-team home"><div class="match-flag">${m.home.flag}</div><div class="match-name">${m.home.name}</div></div>
         ${scoreHtml}
-        <div class="match-team away">
-          <div class="match-flag">${m.away.flag}</div>
-          <div class="match-name">${m.away.name}</div>
-        </div>
+        <div class="match-team away"><div class="match-flag">${m.away.flag}</div><div class="match-name">${m.away.name}</div></div>
       </div>
       <div class="match-venue">📍 ${m.venue}</div>
     </div>`;
   });
-
   list.innerHTML = html;
 }
 
 function filterRound(round, btn) {
-  currentRound = round;
   document.querySelectorAll('.round-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   renderMatches(round);
@@ -633,47 +467,93 @@ function showPage(name, btn) {
   btn.classList.add('active');
 }
 
-// Init
 renderMatches('all');
 
-// PWA Service Worker (GitHub Pages uniquement)
-const isGitHubPages = location.hostname.endsWith('github.io') || 
-                      (!location.hostname.includes('claude') && location.protocol === 'https:');
-if ('serviceWorker' in navigator && isGitHubPages) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js')
-      .then(r => console.log('SW ok:', r.scope))
-      .catch(e => console.warn('SW fail:', e));
-  });
-}
-
-// Bouton installation PWA
-let deferredPrompt = null;
-const installBtn = document.createElement('div');
-installBtn.innerHTML = '\u2b07\ufe0f Installer l\'app';
-installBtn.style.cssText = 'display:none;position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#e8c84a,#d4a835);color:#0a0a0f;font-family:DM Sans,sans-serif;font-weight:700;font-size:13px;padding:10px 22px;border-radius:30px;cursor:pointer;box-shadow:0 4px 20px rgba(232,200,74,.4);z-index:200;white-space:nowrap';
-document.body.appendChild(installBtn);
-
-window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
-  deferredPrompt = e;
-  installBtn.style.display = 'block';
-});
-installBtn.addEventListener('click', async () => {
-  if (!deferredPrompt) return;
-  deferredPrompt.prompt();
-  const { outcome } = await deferredPrompt.userChoice;
-  if (outcome === 'accepted') installBtn.style.display = 'none';
-  deferredPrompt = null;
-});
-window.addEventListener('appinstalled', () => { installBtn.style.display = 'none'; });
-
+// Deeplink
 const urlPage = new URLSearchParams(window.location.search).get('page');
 if (urlPage) {
   const nb = document.querySelector('.nav-btn[onclick*="' + urlPage + '"]');
   if (nb) nb.click();
 }
 
+// ── PWA Install Banner ────────────────────────────────────
+let deferredPrompt = null;
+const banner = document.getElementById('install-banner');
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  setTimeout(() => { banner.style.display = 'block'; }, 2500);
+});
+
+function installApp() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(() => {
+    banner.style.display = 'none';
+    deferredPrompt = null;
+  });
+}
+
+function dismissBanner() { banner.style.display = 'none'; }
+window.addEventListener('appinstalled', () => { banner.style.display = 'none'; });
+
+// ── Service Worker + Notifications ───────────────────────
+let swRegistration = null;
+
+async function initSW() {
+  if (!('serviceWorker' in navigator)) return;
+  try {
+    swRegistration = await navigator.serviceWorker.register('sw.js', { scope: './' });
+    console.log('SW ok:', swRegistration.scope);
+    // Restaurer état notification
+    updateNotifUI();
+  } catch(e) {
+    console.warn('SW fail:', e);
+  }
+}
+
+function updateNotifUI() {
+  const btn = document.getElementById('notif-btn-enable');
+  const btnTest = document.getElementById('notif-btn-test');
+  const status = document.getElementById('notif-status');
+  if (!('Notification' in window)) {
+    btn.textContent = '❌ Non supporté';
+    btn.disabled = true;
+    return;
+  }
+  if (Notification.permission === 'granted') {
+    btn.className = 'notif-btn enabled';
+    btn.textContent = '✅ Alertes activées';
+    btn.onclick = null;
+    btnTest.style.display = 'inline-flex';
+    status.textContent = '9 matchs à venir surveillés — vous serez alerté 15min avant chaque coup d\'envoi.';
+  } else if (Notification.permission === 'denied') {
+    btn.className = 'notif-btn test';
+    btn.textContent = '🚫 Permission refusée';
+    btn.onclick = null;
+    status.textContent = 'Autorisez les notifications dans les paramètres de Brave.';
+  }
+}
+
+async function requestNotifPermission() {
+  if (!('Notification' in window)) return;
+  const perm = await Notification.requestPermission();
+  if (perm === 'granted' && swRegistration) {
+    // Demander au SW de planifier toutes les notifications
+    const sw = swRegistration.active || swRegistration.installing || swRegistration.waiting;
+    if (sw) sw.postMessage({ type: 'SCHEDULE_NOTIFICATIONS' });
+  }
+  updateNotifUI();
+}
+
+function sendTestNotif() {
+  if (!swRegistration) return;
+  const sw = swRegistration.active || swRegistration.installing || swRegistration.waiting;
+  if (sw) sw.postMessage({ type: 'TEST_NOTIFICATION' });
+}
+
+window.addEventListener('load', initSW);
 </script>
 </body>
 </html>
