@@ -429,7 +429,10 @@ async function loadData() {
     // Reset rotation
     setTimeout(() => { if (btn) { btn.style.transition='none'; btn.style.transform='rotate(0deg)'; }}, 700);
   } catch(e) {
-    console.warn('data.json non disponible, utilisation des données statiques:', e.message);
+    // Silencieux en preview — data.json n'existe que sur GitHub Pages
+    if (location.hostname.endsWith('github.io') || location.hostname === 'localhost') {
+      console.warn('data.json indisponible:', e.message);
+    }
     applyData({ matches: FALLBACK_MATCHES, standings: FALLBACK_STANDINGS, updated_at: null });
     setTimeout(() => { if (btn) { btn.style.transition='none'; btn.style.transform='rotate(0deg)'; }}, 700);
   }
@@ -586,7 +589,6 @@ if (urlPage) {
 // Charger les données au démarrage
 loadData();
 
-// Deeplink
 
 // ── PWA Install Banner ────────────────────────────────────
 let deferredPrompt = null;
@@ -615,10 +617,19 @@ let swRegistration = null;
 
 async function initSW() {
   if (!('serviceWorker' in navigator)) return;
+  const isHosted = location.hostname.endsWith('github.io') ||
+                   (!location.hostname.includes('claude') &&
+                    !location.hostname.includes('localhost') === false ||
+                    location.hostname === 'localhost' ||
+                    location.hostname === '127.0.0.1');
+  if (!isHosted) {
+    console.info('SW ignoré en preview (non GitHub Pages)');
+    updateNotifUI();
+    return;
+  }
   try {
     swRegistration = await navigator.serviceWorker.register('sw.js', { scope: './' });
     console.log('SW ok:', swRegistration.scope);
-    // Restaurer état notification
     updateNotifUI();
   } catch(e) {
     console.warn('SW fail:', e);
