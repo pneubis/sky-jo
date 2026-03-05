@@ -1,0 +1,55 @@
+{
+  "name": "6 Nations Rugby 2026",
+  "short_name": "6 Nations",
+  "description": "Scores, classements et matchs du Tournoi des 6 Nations 2026",
+  "start_url": "/",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "background_color": "#0a0a0f",
+  "theme_color": "#0a0a0f",
+  "lang": "fr",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": [
+    "sports"
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Classement",
+      "short_name": "Classement",
+      "description": "Voir le classement du tournoi",
+      "url": "/?page=classement",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Matchs",
+      "short_name": "Matchs",
+      "description": "Voir tous les matchs",
+      "url": "/?page=matchs",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}

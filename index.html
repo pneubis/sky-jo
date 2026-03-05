@@ -2,8 +2,20 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>6 Nations 2026</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0a0a0f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="6 Nations">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+
 <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -27,7 +39,8 @@
     color: var(--text);
     display: flex;
     flex-direction: column;
-    max-width: 430px;
+    width: 100%;
+    max-width: 100%;
     margin: 0 auto;
     position: relative;
   }
@@ -157,11 +170,11 @@
 
   /* BOTTOM NAV */
   .bottom-nav {
-    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
-    width: 100%; max-width: 430px;
+    position: fixed; bottom: 0; left: 0; transform: none;
+    width: 100%; max-width: 100%;
     background: rgba(10,10,15,.95); backdrop-filter: blur(20px);
     border-top: 1px solid var(--border);
-    display: flex; padding: 8px 0 20px;
+    display: flex; padding: 8px 0 calc(20px + env(safe-area-inset-bottom));
     z-index: 100;
   }
   .nav-btn {
@@ -622,6 +635,45 @@ function showPage(name, btn) {
 
 // Init
 renderMatches('all');
+
+// PWA Service Worker (GitHub Pages uniquement)
+const isGitHubPages = location.hostname.endsWith('github.io') || 
+                      (!location.hostname.includes('claude') && location.protocol === 'https:');
+if ('serviceWorker' in navigator && isGitHubPages) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then(r => console.log('SW ok:', r.scope))
+      .catch(e => console.warn('SW fail:', e));
+  });
+}
+
+// Bouton installation PWA
+let deferredPrompt = null;
+const installBtn = document.createElement('div');
+installBtn.innerHTML = '\u2b07\ufe0f Installer l\'app';
+installBtn.style.cssText = 'display:none;position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#e8c84a,#d4a835);color:#0a0a0f;font-family:DM Sans,sans-serif;font-weight:700;font-size:13px;padding:10px 22px;border-radius:30px;cursor:pointer;box-shadow:0 4px 20px rgba(232,200,74,.4);z-index:200;white-space:nowrap';
+document.body.appendChild(installBtn);
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  installBtn.style.display = 'block';
+});
+installBtn.addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  if (outcome === 'accepted') installBtn.style.display = 'none';
+  deferredPrompt = null;
+});
+window.addEventListener('appinstalled', () => { installBtn.style.display = 'none'; });
+
+const urlPage = new URLSearchParams(window.location.search).get('page');
+if (urlPage) {
+  const nb = document.querySelector('.nav-btn[onclick*="' + urlPage + '"]');
+  if (nb) nb.click();
+}
+
 </script>
 </body>
 </html>
