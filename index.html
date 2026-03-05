@@ -539,18 +539,38 @@ function updateNotifUI() {
 async function requestNotifPermission() {
   if (!('Notification' in window)) return;
   const perm = await Notification.requestPermission();
-  if (perm === 'granted' && swRegistration) {
-    // Demander au SW de planifier toutes les notifications
-    const sw = swRegistration.active || swRegistration.installing || swRegistration.waiting;
-    if (sw) sw.postMessage({ type: 'SCHEDULE_NOTIFICATIONS' });
+  if (perm === 'granted') {
+    // Attendre le SW actif puis planifier les notifications
+    navigator.serviceWorker.ready.then(reg => {
+      const sw = navigator.serviceWorker.controller || reg.active;
+      if (sw) sw.postMessage({ type: 'SCHEDULE_NOTIFICATIONS' });
+    });
   }
   updateNotifUI();
 }
 
-function sendTestNotif() {
-  if (!swRegistration) return;
-  const sw = swRegistration.active || swRegistration.installing || swRegistration.waiting;
-  if (sw) sw.postMessage({ type: 'TEST_NOTIFICATION' });
+async function sendTestNotif() {
+  // Attendre que le SW soit actif si ce n'est pas encore le cas
+  if (!swRegistration) {
+    console.warn('SW non enregistré');
+    return;
+  }
+  // Forcer l'attente du SW actif
+  await navigator.serviceWorker.ready;
+  const sw = navigator.serviceWorker.controller;
+  if (sw) {
+    sw.postMessage({ type: 'TEST_NOTIFICATION' });
+  } else {
+    // Fallback : notification directe si le SW ne contrôle pas encore la page
+    if (Notification.permission === 'granted') {
+      new Notification('🏉 6 Nations 2026', {
+        body: 'Les notifications fonctionnent ! Vous serez alerté 15min avant chaque match.',
+        icon: 'icon-192.png',
+        tag: 'test',
+        vibrate: [200, 100, 200]
+      });
+    }
+  }
 }
 
 window.addEventListener('load', initSW);
